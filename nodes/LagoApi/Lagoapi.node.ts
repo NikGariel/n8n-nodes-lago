@@ -23,7 +23,7 @@ export class LagoApi implements INodeType {
 		credentials: [
 			{
 				name: 'lagoApi',
-				required: false,
+				required: true,
 			},
 		],
 		requestDefaults: {

@@ -40,7 +40,7 @@
       "dist/credentials/LagoApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/LagoApi/LagoApi.node.js"
+      "dist/nodes/LagoApi/Lagoapi.node.js"
     ]
   },
   "devDependencies": {
