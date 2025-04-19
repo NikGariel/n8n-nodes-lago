@@ -34,7 +34,19 @@ jobs:
       - uses: pnpm/action-setup@v2
         with:
           version: 9.1.4
+      - name: Get the version
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
       - run: pnpm install --frozen-lockfile
+      # Обновление версии в package.json до версии тега
+      - name: Update version in package.json
+        run: |
+          # Удаляем 'v' из начала версии, если он есть
+          VERSION=$(echo "${{ steps.get_version.outputs.VERSION }}" | sed 's/^v//')
+          # Обновляем версию в package.json
+          sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" package.json
+          echo "Обновлена версия до $VERSION"
+          cat package.json | grep version
       - run: pnpm publish --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
