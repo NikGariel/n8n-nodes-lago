@@ -37,36 +37,21 @@ jobs:
       - name: Get the version
         id: get_version
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-      - name: Extract NPM tag from release
-        id: get_npm_tag
+      - name: Set npm tag
+        id: set_npm_tag
         run: |
           if [[ "${{ github.event.release.prerelease }}" == "true" ]]; then
             echo "NPM_TAG=beta" >> $GITHUB_OUTPUT
           else
-            VERSION=${{ steps.get_version.outputs.VERSION }}
-            if [[ "$VERSION" == *"-alpha"* ]]; then
-              echo "NPM_TAG=alpha" >> $GITHUB_OUTPUT
-            elif [[ "$VERSION" == *"-beta"* ]]; then
-              echo "NPM_TAG=beta" >> $GITHUB_OUTPUT
-            elif [[ "$VERSION" == *"-rc"* ]]; then
-              echo "NPM_TAG=rc" >> $GITHUB_OUTPUT
-            else
-              RELEASE_TAG="${{ github.event.release.tag_name }}"
-              if [[ "$RELEASE_TAG" != "v"* && "$RELEASE_TAG" != "" ]]; then
-                echo "NPM_TAG=$RELEASE_TAG" >> $GITHUB_OUTPUT
-              else
-                echo "NPM_TAG=latest" >> $GITHUB_OUTPUT
-              fi
-            fi
+            echo "NPM_TAG=latest" >> $GITHUB_OUTPUT
           fi
       - run: pnpm install --frozen-lockfile
       - name: Update version in package.json
         run: |
           VERSION=$(echo "${{ steps.get_version.outputs.VERSION }}" | sed 's/^v//')
           sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" package.json
-          echo "Update version to $VERSION"
           cat package.json | grep version
-      - name: Publish with custom tag
-        run: pnpm publish --tag ${{ steps.get_npm_tag.outputs.NPM_TAG }} --no-git-checks
+      - name: Publish package
+        run: pnpm publish --tag ${{ steps.set_npm_tag.outputs.NPM_TAG }} --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
